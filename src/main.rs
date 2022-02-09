@@ -192,6 +192,40 @@ struct DirectoryListing {
     exists: bool
 }
 
+impl std::fmt::Display for DirectoryListing {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let root_copy = self.root_path.clone();
+        write!(f, "{}\n", Black.on(White).paint(root_copy));
+        if self.exists {
+            // Calculate column sizes before printing
+            let size_col_size = self.children.iter().fold(0, |len, item| {
+                let item_size = item.size.to_string().chars().count();
+                if item_size > len {
+                    item_size
+                } else {
+                    len
+                }
+            });
+
+            let size_header = format!("{: >width$}", "Size", width = size_col_size);
+            let last_write_header = format!("{: >16}", "Last Write");
+            // Write the headings
+            write!(f, "{: >11} {: >} {: >} {:<}\n",
+                   Style::new().underline().paint("Permissions"),
+                   Style::new().underline().paint(last_write_header),
+                   Style::new().underline().paint(size_header),
+                   Style::new().underline().paint("Name")
+            );
+            for child in &self.children {
+                write!(f, "{: >11} {: >16} {: >width$} {:<}\n", child.permissions, child.last_write, child.size, child.name, width = size_col_size);
+            }
+        } else {
+            write!(f, "{}", White.on(Red).paint("Directory does not exist."));
+        }
+        Ok(())
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let dirs_to_query = parse_config(&args);
@@ -242,16 +276,10 @@ fn main() {
     }
 
     // Second Pass - Output
-
-
-    println!("Hello!");
+    for listing in listings {
+        println!("{}", listing)
+    }
 }
-
-// let mut print_path = dir.to_string();
-// print_path.push_str(":");
-// println!("{}", Black.on(White).paint(print_path));
-// println!("{}", White.on(Red).paint("Directory does not exist."));
-// println!();
 
 // let file_entry = path.unwrap();
 // let file_metadata = file_entry.metadata().unwrap();
