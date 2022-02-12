@@ -10,7 +10,8 @@ use chrono::{NaiveDateTime, Utc};
 use std::collections::HashMap;
 use std::ffi::OsStr;
 
-
+// TODO: Add colours for file types
+// TODO: Permissions
 // namespace fs
 // {
 // void output_path_permissions(const std::filesystem::path& path, bool is_directory)
