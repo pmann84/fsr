@@ -29,7 +29,7 @@ jobs:
           ref: '${{ steps.relver.outputs.tag }}'
         
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose --release
       - uses: actions/upload-artifact@v2
         with:
           name: windows-binaries-${{ steps.relver.outputs.tag }}
