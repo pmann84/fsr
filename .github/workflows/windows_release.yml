@@ -26,7 +26,7 @@ jobs:
       - name: Checkout reposistory
         uses: actions/checkout@v2
         with:
-          ref: 'release-${{ steps.relver.outputs.tag }}'
+          ref: '${{ steps.relver.outputs.tag }}'
         
       - name: Build
         run: cargo build --verbose
