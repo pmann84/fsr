@@ -3,13 +3,10 @@ use std::{env, fs, io};
 use std::path::PathBuf;
 use std::path::Path;
 use ansi_term::Style;
-use ansi_term::Colour::{White, Black, Red};
+use ansi_term::Colour::{White, Black, Red, Blue};
 use filetime::FileTime;
 use chrono::prelude::DateTime;
 use chrono::{NaiveDateTime, Utc};
-use std::collections::HashMap;
-use std::ffi::OsStr;
-
 
 // namespace fs
 // {
@@ -136,13 +133,13 @@ fn get_list_entry_type(is_dir: bool) -> ListEntryType {
 
 enum ListFileType {
     None,
-    Archive,
-    Audio,
-    Binary,
-    Document,
-    Image,
-    Source,
-    Web
+    // Archive,
+    // Audio,
+    // Binary,
+    // Document,
+    // Image,
+    // Source,
+    // Web
 }
 
 impl Default for ListFileType {
@@ -162,7 +159,7 @@ struct ListEntry {
     last_write: String,
     permissions: String,
     entry_type: ListEntryType,
-    file_type: ListFileType
+    _file_type: ListFileType
 }
 
 fn get_list_entry_from_file_metadata(filename: &str, file_metadata: &Metadata) -> ListEntry {
@@ -173,7 +170,7 @@ fn get_list_entry_from_file_metadata(filename: &str, file_metadata: &Metadata) -
         last_write: get_last_write_time_string(&file_metadata),
         permissions: get_permissions_string(is_dir).to_string(),
         entry_type: get_list_entry_type(is_dir),
-        file_type: get_list_file_type(filename)
+        _file_type: get_list_file_type(filename)
     };
     child
 }
@@ -217,7 +214,14 @@ impl std::fmt::Display for DirectoryListing {
                    Style::new().underline().paint("Name")
             );
             for child in &self.children {
-                write!(f, "{: >11} {: >16} {: >width$} {:<}\n", child.permissions, child.last_write, child.size, child.name, width = size_col_size);
+                match child.entry_type {
+                    ListEntryType::Directory => {
+                        write!(f, "{: >11} {: >16} {: >width$} {:<}\n", child.permissions, child.last_write, child.size, Blue.paint(&child.name), width = size_col_size);
+                    }
+                    ListEntryType::File => {
+                        write!(f, "{: >11} {: >16} {: >width$} {:<}\n", child.permissions, child.last_write, child.size, child.name, width = size_col_size);
+                    }
+                }
             }
         } else {
             write!(f, "{}", White.on(Red).paint("Directory does not exist."));
@@ -229,6 +233,13 @@ impl std::fmt::Display for DirectoryListing {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let dirs_to_query = parse_config(&args);
+
+    // Check for help
+    if dirs_to_query.contains(&String::from("-h")) || dirs_to_query.contains(&String::from("--help")) {
+        println!("Usage: fsr [-h|--help] [path [PATH ...]]\n\nPositional Arguments:\npath: Path(s) to list.\n\nOptional Arguments:\n-h, --help: Show this help message and exit.");
+        std::process::exit(0);
+    }
+
     let mut listings: Vec<DirectoryListing> = Vec::new();
 
     // First pass - read files
