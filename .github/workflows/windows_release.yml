@@ -33,7 +33,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: windows-binaries-${{ steps.relver.outputs.tag }}
-          path: ${{runner.workspace}}fsr/target/release/fsr.exe
+          path: ${{runner.workspace}}\fsr\target\release\fsr.exe
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
           
     #- name: Run tests
