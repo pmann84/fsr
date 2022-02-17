@@ -1,0 +1,42 @@
+name: Rust
+
+on:
+  push:
+    tags:
+      - 'release-*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Set Release env
+        id: relver
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        shell: bash
+        
+      - name: Check Release Version
+        run: echo ${{ steps.relver.outputs.tag }}
+        shell: bash
+        
+      - name: Checkout reposistory
+        uses: actions/checkout@v2
+        with:
+          ref: '${{ steps.relver.outputs.tag }}'
+        
+      - name: Build
+        run: cargo build --verbose --release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: windows-binaries-${{ steps.relver.outputs.tag }}
+          path: ${{runner.workspace}}/target/release/fsr.exe
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+          
+    #- name: Run tests
+    #  run: cargo test --verbose
+    
+    

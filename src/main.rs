@@ -7,6 +7,8 @@ use ansi_term::Colour::{White, Black, Red, Blue};
 use filetime::FileTime;
 use chrono::prelude::DateTime;
 use chrono::{NaiveDateTime, Utc};
+// TODO: Add colours for file types
+// TODO: Permissions
 
 // namespace fs
 // {
